@@ -1,0 +1,119 @@
+{% extends "base.html" %}
+{% block head %}
+<style>
+  .fld { padding:6px 8px; border-bottom:1px solid #eee; }
+  .fld.unc { background:var(--warn); }
+  .fld .lab { font-weight:600; font-size:13.5px; }
+  .opts { display:flex; flex-wrap:wrap; gap:4px 10px; margin-top:3px; }
+  .opts label { white-space:nowrap; font-size:13.5px; }
+  .opts input { transform:scale(1.25); margin-right:3px; }
+  .sec { background:#efe6f8; color:var(--purple); font-weight:700; padding:6px 8px; margin-top:10px; }
+  .imgbox img { width:100%; border:1px solid var(--line); border-radius:6px; }
+  .sticky { position:sticky; top:8px; }
+  .totalbar { position:sticky; bottom:0; background:#fff; border-top:2px solid var(--navy); padding:10px; display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+</style>
+{% endblock %}
+{% block body %}
+<div class="grid2">
+  <div><div class="sticky imgbox">
+    <a href="{{ url_for('photo', pid=p.id) }}" target="_blank"><img src="{{ url_for('photo', pid=p.id) }}" alt="sheet photo"></a>
+    <p class="muted">Page {{ p.id }} · {{ p.original_name }} · status <b>{{ p.status }}</b>{% if p.model %} · read by {{ p.model }}{% endif %}. Tap the photo to zoom.</p>
+  </div></div>
+  <div>
+    {% if p.error %}<div class="err">{{ p.error }}</div>{% endif %}
+    {% if p.notes %}<div class="warnbox">Reader notes: {{ p.notes }}</div>{% endif %}
+    {% if p.uncertain %}<div class="warnbox">{{ p.uncertain|length }} mark(s) the reader wasn't sure about are highlighted yellow - check them against the photo.</div>{% endif %}
+    {% if dup %}<div class="warnbox">This sheet was already confirmed (page {{ dup.id }}). Confirming again will <b>replace</b> it.</div>{% endif %}
+
+    <form method="post" class="card" style="padding:10px">
+      <input type="hidden" name="action" value="identity">
+      <b>Sheet:</b>
+      <select name="event" onchange="this.form.submit()">
+        <option value="">- event -</option>
+        {% for eid, e in cfg.events.items() %}<option value="{{ eid }}" {% if eid == p.event %}selected{% endif %}>{{ e.name }}</option>{% endfor %}
+      </select>
+      {% if ev %}
+      judge <select name="judge" onchange="this.form.submit()">{% for j in range(1, ev.judges+1) %}<option {% if j == p.judge %}selected{% endif %}>{{ j }}</option>{% endfor %}</select>
+      page <select name="page" onchange="this.form.submit()">{% for j in range(1, n_pages+1) %}<option {% if j == p.page %}selected{% endif %}>{{ j }}</option>{% endfor %}</select>
+      <br><b>School / entry:</b>
+      <select name="entry_id" onchange="this.form.submit()" style="max-width:100%">
+        <option value="">- choose -</option>
+        {% for e in entries %}<option value="{{ e.entry_id }}" {% if e.entry_id == p.entry_id %}selected{% endif %}>{{ e.display }} ({{ e.entry_id }})</option>{% endfor %}
+      </select>
+      {% if not entry %}<span style="color:#b3261e">← required</span>{% endif %}
+      {% endif %}
+      <noscript><button>Update</button></noscript>
+    </form>
+
+    {% if ev %}
+    <form method="post" id="vals" class="card" style="padding:0">
+      <div style="padding:8px"><b>Judge name:</b> <input type="text" name="judge_name" value="{{ p.judge_name or '' }}" style="width:60%"></div>
+      {% for title, fields in groups %}
+        <div class="sec">{{ title }}</div>
+        {% for f in fields %}{% set v = p['values'].get(f.key) %}
+        <div class="fld {% if f.key in p.uncertain %}unc{% endif %}">
+          <div class="lab">{% if f.number %}{{ f.number }}. {% endif %}{{ f.label }}{% if f.group and f.kind == 'choice' %} — {{ f.group }}{% elif f.group %} <span class="muted">({{ f.group }})</span>{% endif %}
+            {% if f.kind == 'multi' and f.role != 'deduct_grid' %}<span class="muted"> · tick criteria MISSED (max {{ fmt_pts(f.max_points) }})</span>{% endif %}
+            {% if f.role == 'penalty' %}<span class="muted"> · -{{ fmt_pts(f.points) }} each</span>{% endif %}</div>
+          <div class="opts">
+          {% if f.kind == 'choice' %}
+            {% for x in f.values %}<label><input type="radio" name="{{ f.key }}" value="{{ x }}" data-score="{{ x }}" {% if v == x %}checked{% endif %}>{{ x }}</label>{% endfor %}
+            <label class="muted"><input type="radio" name="{{ f.key }}" value="" {% if v is none %}checked{% endif %}>blank</label>
+          {% elif f.kind == 'multi' %}
+            {% for o in f.options %}<label><input type="checkbox" name="{{ f.key }}" value="{{ loop.index }}" data-lose="{{ o.points }}" {% if loop.index in (v or []) %}checked{% endif %}>{{ o.label }} {{ fmt_pts(o.points) }}</label>{% endfor %}
+            <span class="maxpts" data-max="{{ f.max_points }}" hidden></span>
+          {% elif f.kind == 'flag' %}
+            <label><input type="checkbox" name="{{ f.key }}" value="1" {% if v %}checked{% endif %}>YES</label>
+          {% elif f.kind == 'count' %}
+            <input type="number" name="{{ f.key }}" min="0" max="{{ f.max_count }}" value="{{ '' if v is none else v }}" style="width:80px">
+          {% else %}
+            <input type="text" name="{{ f.key }}" value="{{ v or '' }}">
+          {% endif %}
+          </div>
+        </div>
+        {% endfor %}
+      {% endfor %}
+      <div class="sec">Judge comments</div>
+      <div class="fld">
+        <textarea name="comments" rows="4" style="width:100%;font:inherit;padding:7px;border:1px solid #b8bcc4;border-radius:6px"
+          placeholder="Type the judge's comments from the sheet (optional). They go in the school's score report.">{{ p.comments or '' }}</textarea>
+      </div>
+      <div class="totalbar">
+        <span>Points on this page: <b id="tot">-</b></span>
+        <span style="flex:1"></span>
+        <button name="action" value="save" class="secondary">Save</button>
+        <span style="display:inline-flex;gap:0;align-items:stretch">
+          <select name="reread_with" title="Model and effort for the re-read" style="border-radius:8px 0 0 8px;max-width:260px" {% if not api_on %}disabled{% endif %}>
+            {% for val, label in reread_opts %}<option value="{{ val }}">{{ label }}</option>{% endfor %}
+          </select>
+          <button name="action" value="reread" class="secondary" style="border-radius:0 8px 8px 0" {% if not api_on %}disabled{% endif %}>Re-read photo</button>
+        </span>
+        <button name="action" value="reject" class="danger" onclick="return confirm('Reject this photo? It will not count.')">Reject</button>
+        <button name="action" value="confirm">✔ Confirm</button>
+      </div>
+    </form>
+    {% else %}
+      <form method="post" style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+        <select name="reread_with" title="Model and effort for the re-read" style="max-width:260px" {% if not api_on %}disabled{% endif %}>
+          {% for val, label in reread_opts %}<option value="{{ val }}">{{ label }}</option>{% endfor %}
+        </select>
+        <button name="action" value="reread" class="secondary" {% if not api_on %}disabled{% endif %}>Re-read photo</button>
+        <button name="action" value="reject" class="danger">Reject photo</button>
+      </form>
+    {% endif %}
+  </div>
+</div>
+<script>
+function recalc() {
+  let t = 0;
+  document.querySelectorAll('#vals input[type=radio]:checked').forEach(r => { if (r.dataset.score) t += parseFloat(r.dataset.score); });
+  document.querySelectorAll('#vals .maxpts').forEach(m => {
+    let s = parseFloat(m.dataset.max);
+    m.parentElement.querySelectorAll('input[data-lose]:checked').forEach(c => s -= parseFloat(c.dataset.lose));
+    t += s;
+  });
+  const el = document.getElementById('tot'); if (el) el.textContent = Math.round(t*100)/100;
+}
+document.addEventListener('change', recalc); recalc();
+</script>
+{% endblock %}

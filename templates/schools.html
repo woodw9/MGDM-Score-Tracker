@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block body %}
+<div class="card">
+  <h2 style="margin-top:0">School score reports</h2>
+  <p>Download a spreadsheet for one school to send when they ask for their scores. It has a <b>Summary</b> tab (place, judge scores, penalties and total for each of their entries, plus their overall place) and one tab per event with every judge's marks and comments.</p>
+  <p class="muted">Only confirmed sheets are included. Judge names and other schools' scores are left out.</p>
+  <p><a class="btn" href="{{ url_for('download_all_schools') }}">⬇ Download all schools (.zip)</a></p>
+  <table><tr><th>School</th><th>Entries</th><th>Events</th><th></th></tr>
+  {% for sch, n, evs in rows %}
+    <tr><td>{{ sch }}</td><td>{{ n }}</td><td>{{ evs }}</td>
+        <td><a href="{{ url_for('download_school', school=sch) }}">⬇ Excel report</a></td></tr>
+  {% else %}<tr><td colspan="4" class="muted">No entries loaded - fill in config/entries.csv.</td></tr>{% endfor %}
+  </table>
+</div>
+{% endblock %}

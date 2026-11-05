@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block body %}
+<div class="card">
+  <h2 style="margin-top:0">Scanner folder</h2>
+  <p>Set the document scanner to save its scans (PDF or JPG) into this folder on the scoring laptop:</p>
+  <p><code style="font-size:15px">{{ inbox }}</code></p>
+  {% if watch.on %}
+    <p><b style="color:var(--green)">● Watching automatically</b> - new scans are picked up within a few seconds. Multi-page PDFs are split into sheets{% if cfg.settings.get('batch', {}).get('skip_blank_pages', True) %} and blank pages (duplex backs) are skipped{% endif %}. Order doesn't matter - every sheet is identified by its QR code.</p>
+    {% if watch.last %}<p class="muted">Last pickup {{ watch.last.at }}: {{ watch.last.files }} file(s) → {{ watch.last.sheets }} sheet page(s){% if watch.last.blank %}, {{ watch.last.blank }} blank skipped{% endif %}.
+      {% if watch.last.errors %}<br><span style="color:#b3261e">Problems (moved to inbox/failed): {{ watch.last.errors|join('; ') }}</span>{% endif %}</p>{% endif %}
+  {% else %}
+    <p class="muted">Automatic pickup is off (it runs when the server is started with <code>run.py serve</code> / start.command and <code>batch.watch_inbox</code> is true).</p>
+  {% endif %}
+  <p>{{ waiting|length }} file(s) waiting in the folder.</p>
+  <form method="post" action="{{ url_for('batch_inbox') }}"><button {% if not waiting %}disabled{% endif %}>Read folder now</button></form>
+  <p class="muted">Finished files move to <code>inbox/processed</code>; unreadable files to <code>inbox/failed</code>.</p>
+</div>
+<div class="card">
+  <h3 style="margin-top:0">Upload files</h3>
+  <p>Or pick scans / photos from this computer (PDF, JPG, PNG, HEIC, TIFF):</p>
+  <form method="post" action="{{ url_for('upload') }}" enctype="multipart/form-data">
+    <input type="hidden" name="back" value="{{ url_for('review_list') }}">
+    <p><input type="file" name="photos" accept="image/*,.pdf,application/pdf" multiple></p>
+    <button>Upload &amp; read</button>
+  </form>
+</div>
+{% endblock %}

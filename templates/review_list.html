@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block head %}{% if reading %}<meta http-equiv="refresh" content="5">{% endif %}{% endblock %}
+{% block body %}
+<div class="card">
+  <h2 style="margin-top:0">Review queue ({{ pages|length }})</h2>
+  {% if reading %}<p class="muted">{{ reading|length }} photo(s) still being read - this page refreshes automatically.</p>{% endif %}
+  {% if pages %}
+  <table>
+    <tr><th>ID</th><th>Sheet</th><th>School / entry</th><th>Uncertain</th><th>Problems</th><th></th></tr>
+    {% for p in pages|reverse %}
+      {% set e = entries.get(p.entry_id or '') %}
+      <tr {% if p.error %}style="background:var(--bad)"{% elif p.uncertain %}style="background:var(--warn)"{% endif %}>
+        <td>{{ p.id }}</td>
+        <td>{% if p.event %}{{ cfg.events[p.event].abbr }} judge #{{ p.judge }} p{{ p.page }}{% else %}?{% endif %}</td>
+        <td>{{ e.display if e else (p.entry_id or 'not identified') }}</td>
+        <td>{{ p.uncertain|length or '' }}</td>
+        <td>{{ p.error or '' }} {{ p.notes or '' }}</td>
+        <td><a class="btn" href="{{ url_for('page', pid=p.id) }}">Review</a></td>
+      </tr>
+    {% endfor %}
+  </table>
+  {% else %}<p>Nothing waiting. 🎉</p>{% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block body %}
+<div class="card">
+  <h2 style="margin-top:0">{{ cfg.meet.name }}</h2>
+  <p><b>Phones on the same Wi-Fi:</b> open <code style="font-size:17px">{{ url }}</code></p>
+  <p>Photo reader: {% if api_on %}<b style="color:green">ON</b> ({{ cfg.settings.reader.model }}){% else %}<b style="color:#b3261e">OFF</b> - no ANTHROPIC_API_KEY set; sheets upload and you enter marks by hand on the review screen.{% endif %}</p>
+  <p>Entries loaded: {{ entries }} &nbsp;|&nbsp; Pages: {{ counts.get('reading',0) }} reading, {{ counts.get('review',0) }} waiting for review, {{ counts.get('confirmed',0) }} confirmed, {{ counts.get('rejected',0) }} rejected</p>
+  <p>Excel master: {% if sync.excel and sync.excel.ok %}updated {{ sync.excel.at }}{% elif sync.excel %}<span style="color:#b3261e">ERROR {{ sync.excel.msg }}</span>{% else %}not built yet{% endif %}
+     &nbsp;|&nbsp; Google Sheets: {% if not sync.google %}not synced yet{% elif sync.google.ok %}synced {{ sync.google.at }}{% elif sync.google.ok is none %}{{ sync.google.msg }}{% else %}<span style="color:#b3261e">ERROR {{ sync.google.at }}: {{ sync.google.msg }}</span>{% endif %}</p>
+  <p style="display:flex;gap:8px;flex-wrap:wrap">
+    <a class="btn" href="{{ url_for('capture') }}">📷 Capture sheets</a>
+    <a class="btn secondary" href="{{ url_for('download_excel') }}">⬇ Download Excel</a>
+    <form method="post" action="{{ url_for('publish_now') }}" style="display:inline"><button class="secondary">Rebuild Excel + sync Google now</button></form>
+    <form method="post" action="{{ url_for('reload_config') }}" style="display:inline"><button class="secondary">Reload config files</button></form>
+  </p>
+</div>
+<div class="card">
+  <h3 style="margin-top:0">Events</h3>
+  <table><tr><th>Event</th><th>Judges</th><th>Combine</th><th>Sheets add up to</th><th>Max used for scoring</th><th>Weight</th></tr>
+  {% for eid, ev in cfg.events.items() %}
+    {% set o = cfg.overall.events.get(eid) %}
+    <tr><td>{{ ev.name }}</td><td>{{ ev.judges }}</td><td>{{ ev.combine }}</td><td>{{ fmt_pts(ev.max_possible) }}</td>
+        <td>{% if o %}{{ fmt_pts(cfg.benchmark(eid)) }}{% else %}<span class="muted">not in overall</span>{% endif %}</td>
+        <td>{{ o.weight if o else '' }}</td></tr>
+  {% endfor %}
+  </table>
+  <p class="muted">Change any of this in config/events.yaml, then press "Reload config files".</p>
+</div>
+<p class="muted" style="text-align:right"><a href="{{ url_for('clear_scores') }}" style="color:#b3261e">Clear all scores…</a> (master password required)</p>
+{% endblock %}

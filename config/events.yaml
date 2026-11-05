@@ -1,0 +1,442 @@
+# =====================================================================
+#  MGDM 2027 - EVENT & SCORING CONFIGURATION
+#  Every scoring rule lives here. Edit this file and restart the app;
+#  scoresheet PDFs, the photo reader, and the spreadsheet all follow it.
+#
+#  IMPORTANT: if you change a sheet's layout (add/remove/reorder items)
+#  AFTER printing, re-print the sheets - the reader expects the printed
+#  layout to match this file.
+# =====================================================================
+
+meet:
+  name: "53rd Annual Mardi Gras Drill Meet"
+  short: "MGDM 2027"
+  code: "MGDM27"          # printed inside every QR code
+
+# ---------------------------------------------------------------------
+#  OVERALL STANDINGS  (LOI Encl 5)
+# ---------------------------------------------------------------------
+overall:
+  # How each event feeds the overall score:
+  #   percent  -> (team total / benchmark) * weight      (default)
+  #   raw      -> team total as-is
+  method: percent
+  # Only a school's best team in an event counts toward the overall.
+  best_team_only: true
+  # Ties are broken by this event's score (higher wins).
+  tiebreak_event: platoon_inspection
+  # Events that count toward the overall and their settings.
+  #   benchmark: "auto" = sum of every judge sheet's max points, computed
+  #              from this file. Put a number to override (the LOI lists
+  #              724 / 356.5 / 270 / 340 / 229).
+  #   weight:    points the event is worth in the overall (percent method).
+  #              200 = "TOTAL POINTS (OF 200)" like the internal Scoring Program workbook.
+  events:
+    platoon_inspection: { benchmark: 724,  weight: 200 }   # max per the Scoring Program workbook
+    platoon_basic:      { benchmark: auto, weight: 200 }
+    platoon_exhibition: { benchmark: auto, weight: 200 }
+    color_guard:        { benchmark: auto, weight: 200 }
+    squad_basic:        { benchmark: 293.5, weight: 200 }  # max per the Scoring Program workbook
+  # Weather: list any event cancelled for some schools here and it is
+  # dropped from everyone's overall (LOI 3.d.(10)(d)).
+  excluded_events: []
+
+# Default way judge sheets combine into a team's event score.
+#   sum     -> add judges together (current rule)
+#   average -> mean of the judges
+judge_combine: sum
+
+# ---------------------------------------------------------------------
+#  Reusable criteria lists for Basic Drill (label, points)
+# ---------------------------------------------------------------------
+x-criteria:
+  form_platoon: &form_platoon
+    - [EXECUTION, 0.5]
+    - [DIST, 0.5]
+    - [REPORT, 0.5]
+    - [COVER, 0.5]
+    - [SIZING, 0.5]
+    - [INSPECTION ARMS, 1.0]
+  on_line: &on_line
+    - [EXECUTION, 0.5]
+    - [T-ARMS, 0.5]
+    - [ALIGN, 1.0]
+    - [COVER, 0.5]
+    - [ARMSWING, 0.5]
+    - [FINGERTIPS, 0.5]
+    - [SQD LEADERS, 0.5]
+    - [XM, 0.5]
+    - [30 INCH STEP, 0.5]
+  open_ranks: &open_ranks
+    - [EXECUTION, 1.0]
+    - [ARM SWING, 1.0]
+    - [COVER, 1.0]
+    - [T-ARMS, 1.0]
+    - [SQD LDR, 1.0]
+  port_arms: &port_arms
+    - [EXECUTION & PRECISION, 1.0]
+    - [WRIST, 0.5]
+    - [R-FOREARM, 0.5]
+    - [WPN ANGLE, 0.5]
+    - [4 INCHES, 0.5]
+    - [L-HAND PLACEMENT, 0.5]
+    - [XM, 1.0]
+  shoulder_arms: &shoulder_arms
+    - [EXECUTION & PRECISION, 1.0]
+    - [WPN ANGLE, 0.5]
+    - [BW, 0.5]
+    - [OPB, 0.5]
+    - [UPPER ARM, 0.5]
+    - [XM, 1.0]
+  present_arms: &present_arms
+    - [EXECUTION & PRECISION, 1.0]
+    - [L-UPPER ARM, 0.5]
+    - [L-WRIST, 0.5]
+    - [L-FOREARM, 0.5]
+    - [R-HAND PLACEMENT, 0.5]
+    - [SLIP RING, 0.5]
+    - [XM, 1.0]
+  order_arms: &order_arms
+    - [EXECUTION & PRECISION, 1.0]
+    - [T-SEAM, 0.5]
+    - [TOE-TO-TOE, 0.5]
+    - ['3"', 0.5]
+    - [L-HAND PLACEMENT, 0.5]
+    - [XM, 1.0]
+  side_step: &side_step
+    - [EXECUTION, 1.0]
+    - ['12" STEP', 1.0]
+    - [T-ARMS, 0.5]
+    - [COVER, 0.5]
+    - [ALIGNMENT, 0.5]
+    - [INT, 0.5]
+    - [XM, 1.0]
+  about_face: &about_face
+    - [EXECUTION, 1.0]
+    - [STRAIGHT LEG, 1.0]
+    - [T-ARMS, 0.5]
+    - [45 DEGREE, 0.5]
+    - [TOE-TO-TOE, 0.5]
+    - [HEELS, 0.5]
+    - [XM, 1.0]
+  column: &column
+    - [EXECUTION, 1.0]
+    - [ATB, 1.0]
+    - [SEQUENCE, 1.0]
+    - ['30" STEP', 0.5]
+    - [1/2 STEP, 0.5]
+    - [INT, 1.0]
+  close_marching: &close_marching
+    - [EXECUTION, 1.0]
+    - [30-15, 1.0]
+    - [15-30, 1.0]
+    - [COVER, 1.0]
+    - [INT, 1.0]
+  flank: &flank
+    - [EXECUTION, 1.0]
+    - ['30" STEP', 0.5]
+    - [30-15, 0.5]
+    - [15-30, 0.5]
+    - [ALIGNMENT, 0.5]
+    - [COVER, 1.0]
+    - [INT, 1.0]
+  oblique_halt: &oblique_halt
+    - [EXECUTION, 1.0]
+    - [COVER, 1.0]
+    - [ANGLE, 0.5]
+    - [INT, 0.5]
+    - [HALT, 0.5]
+    - ['30" STEP', 0.5]
+  to_rear: &to_rear
+    - [EXECUTION, 1.0]
+    - ['15" STEP', 1.0]
+    - [INT, 0.5]
+    - [ALIGN, 0.5]
+    - [COVER, 0.5]
+    - [ARMSWING, 0.5]
+  eyes_right: &eyes_right
+    - [EXECUTION, 1.0]
+    - [RC, 0.5]
+    - [ARMSWING, 1.0]
+    - [OOS, 1.0]
+    - ['30" STEP', 0.5]
+  fall_out: &fall_out
+    - [ANTICIPATION, 1.0]
+    - [HESITATION, 1.0]
+    - [RUN, 1.0]
+    - [PORT ARMS, 1.0]
+  face: &face
+    - [EXECUTION, 1.0]
+    - [T-ARMS, 1.0]
+    - [45 DEGREES, 0.5]
+    - [HEELS, 0.5]
+    - [ALIGNMENT, 0.5]
+    - [COVER, 0.5]
+  parade_rest: &parade_rest
+    - [EXECUTION, 1.0]
+    - ['12"', 1.0]
+    - [L-HAND PLACEMENT, 0.5]
+    - [R-HAND PLACEMENT, 0.5]
+    - [BTWC, 1.0]
+  oblique_half: &oblique_half
+    - [EXECUTION, 1.0]
+    - [COVER, 1.0]
+    - [30-15, 1.0]
+    - [15-30, 1.0]
+    - [ALIGNMENT, 1.0]
+  change_step: &change_step
+    - [EXECUTION, 1.0]
+    - [NO SKIP, 1.0]
+    - [FOOT PLACEMENT, 1.0]
+    - [SILENT, 1.0]
+
+x-sections:
+  exhibition_categories: &exhibition_categories
+    title: "SCORING (fill ONE bubble per row)"
+    type: ratings
+    items:
+      - [PRECISION, 1-10]
+      - [DIFFICULTY, 1-10]
+      - [MILITARY BEARING, 1-10]
+      - [ORIGINALITY, 1-10]
+      - [VARIETY, 1-10]
+      - [FLOOR COVERAGE, 1-10]
+      - [FLOW OF ROUTINE, 1-10]
+      - [COMPLEXITY, 1-10]
+      - [OVERALL IMPRESSION, 1-10]
+  exhibition_penalties: &exhibition_penalties
+    title: "PENALTIES (Sheet #1 only)"
+    type: penalties
+    items:
+      # kind flag  -> bubble YES = points once
+      # kind count -> number bubbled x points
+      # apply_to all_judges -> deducted from EVERY judge's sheet
+      # apply_to once       -> deducted one time from the team total
+      - { label: "TIME UNDER 7 MINUTES", kind: flag,  points: 5, apply_to: all_judges }
+      - { label: "TIME OVER 9 MINUTES",  kind: flag,  points: 5, apply_to: all_judges }
+      - { label: "BOUNDARY BREAK",       kind: count, points: 5, apply_to: once }
+      - { label: "DROPPED WEAPONS",      kind: count, points: 5, apply_to: once }
+      - { label: "COMMUNICATION",        kind: count, points: 5, apply_to: once }
+      - { label: "INCORRECT # OF MEMBERS", kind: count, points: 5, apply_to: once }
+  unit_leader_platoon: &unit_leader_platoon
+    title: "UNIT LEADER (fill ONE bubble per row)"
+    type: ratings
+    items:
+      - [POSITION OF UNIT LEADER, 1-5]
+      - [SWORD MANUAL, 1-5]
+      - [COMMAND VOICE, 1-5]
+      - [COMMAND PRESENCE / BEARING, 1-5]
+      - [PROPER COMMANDS, 1-5]
+      - [EYES RIGHT, 1-5]
+  unit_leader_squad: &unit_leader_squad
+    title: "UNIT LEADER (fill ONE bubble per row)"
+    type: ratings
+    items:
+      - [POSITION OF UNIT LEADER, 1-5]
+      - [SWORD MANUAL, 1-5]
+      - [COMMAND VOICE, 1-5]
+      - [COMMAND PRESENCE / BEARING, 1-5]
+      - [PROPER COMMANDS, 1-5]
+  basic_penalties: &basic_penalties
+    title: "PENALTIES (Sheet #1 only)"
+    type: penalties
+    items:
+      - { label: "EXCESSIVE FREE MOVEMENT (over 3)", kind: count, points: 5, apply_to: once }
+  inspection_rows: &inspection_rows
+    - [GENERAL, [MANUAL OF ARMS, COMMAND VOICE, BEARING]]
+    - [WEAPONS, [DIRTY]]
+    - [COVER, [DIRTY, IMPROPER FIT, UNSERVICEABLE, IRISH PENNANTS]]
+    - [COAT, [DIRTY, IMPROPER FIT, UNSERVICEABLE, WRINKLED, IRISH PENNANTS, RIBBONS ETC]]
+    - [SHIRT, [DIRTY, IMPROPER FIT, UNSERVICEABLE, WRINKLED, IRISH PENNANTS, RIBBONS ETC]]
+    - [BELT, [DIRTY, IRISH PENNANTS, TARNISHED BRASS, LENGTH]]
+    - [TROUSERS, [DIRTY, IMPROPER FIT, UNSERVICEABLE, WRINKLED, IRISH PENNANTS]]
+    - [SHOES, [SOLES, UNSHINED/SCUFFED]]
+    - [HYGIENE, [HAIR PROTRUDING, HAIR CUT, IMPROPER SHAVE, FINGER NAILS]]
+    - [KNOWLEDGE, [QUESTION 1, QUESTION 2, QUESTION 3]]
+
+# ---------------------------------------------------------------------
+#  EVENTS
+#  judges:   number of judge sheets per team
+#  sheets:   which sections appear on each judge's sheet
+#  members:  required / minimum headcount (penalty per missing member,
+#            disqualified below minimum). Bubbled on Sheet #1.
+#  combine:  optional per-event override of judge_combine
+# ---------------------------------------------------------------------
+events:
+
+  platoon_inspection:
+    name: "Platoon Inspection"
+    abbr: PI
+    judges: 3
+    write_ins: []
+    members: { required: 17, minimum: 14, points_per_missing: 5, apply_to: once }
+    sheets:
+      1: [squad1]
+      2: [squad2]
+      3: [squad3]
+    sections:
+      squad1:
+        title: "FIRST SQUAD - mark a bubble for each discrepancy"
+        type: grid
+        rows: *inspection_rows
+        columns:
+          - [PLTN CMDR, 2]
+          - [GUIDE, 2]
+          - [SL, 1]
+          - [SM 1, 1]
+          - [SM 2, 1]
+          - [SM 3, 1]
+          - [SM 4, 1]
+      squad2:
+        title: "SECOND SQUAD - mark a bubble for each discrepancy"
+        type: grid
+        rows: *inspection_rows
+        columns: [[SL, 1], [SM 1, 1], [SM 2, 1], [SM 3, 1], [SM 4, 1]]
+      squad3:
+        title: "THIRD SQUAD - mark a bubble for each discrepancy"
+        type: grid
+        rows: *inspection_rows
+        columns: [[SL, 1], [SM 1, 1], [SM 2, 1], [SM 3, 1], [SM 4, 1]]
+
+  platoon_basic:
+    name: "Platoon Armed Basic Drill"
+    abbr: PB
+    judges: 3
+    members: { required: 17, minimum: 14, points_per_missing: 5, apply_to: once }
+    sheets:
+      1: [movements, unit_leader, penalties]
+      2: [movements]
+      3: [movements]
+    sections:
+      movements:
+        title: "MOVEMENTS - fill a bubble for each criterion NOT met"
+        type: criteria
+        items:
+          - [FORM THE PLATOON, *form_platoon]
+          - [CLOSE ON LINE, *on_line]
+          - [EXTEND ON LINE, *on_line]
+          - [OPEN RANKS, *open_ranks]
+          - [PORT ARMS, *port_arms]
+          - [RIGHT SHOULDER ARMS, *shoulder_arms]
+          - [PRESENT ARMS, *present_arms]
+          - [LEFT SHOULDER ARMS, *shoulder_arms]
+          - [ORDER ARMS, *order_arms]
+          - [SIDE STEP (LEFT/RIGHT), *side_step]
+          - [ABOUT FACE (REPEAT), *about_face]
+          - [COLUMN RIGHT (HALTED), *column]
+          - [CLOSE WHILE MARCHING, *close_marching]
+          - [RIGHT FLANK / RETURN TO COLUMN, *flank]
+          - [COLUMN RIGHT, *column]
+          - [RIGHT OBLIQUE / PLATOON HALT, *oblique_halt]
+          - [COLUMN HALF RIGHT (REPEAT), *column]
+          - [COLUMN RIGHT, *column]
+          - [MARCH TO THE REAR (REPEAT), *to_rear]
+          - [EYES RIGHT, *eyes_right]
+          - [FALL OUT, *fall_out]
+      unit_leader: *unit_leader_platoon
+      penalties: *basic_penalties
+
+  squad_basic:
+    name: "Squad Armed Basic Drill"
+    abbr: SB
+    judges: 2
+    members: { required: 7, minimum: 5, points_per_missing: 5, apply_to: once }
+    sheets:
+      1: [movements, unit_leader, penalties]
+      2: [movements, unit_leader]
+    sections:
+      movements:
+        title: "MOVEMENTS - fill a bubble for each criterion NOT met"
+        type: criteria
+        items:
+          - [FORM THE PLATOON AT CLOSE INTERVAL, *form_platoon]
+          - [EXTEND ON LINE, *on_line]
+          - [LEFT/RIGHT FACE, *face]
+          - [PORT ARMS, *port_arms]
+          - [LEFT SHOULDER ARMS, *shoulder_arms]
+          - [RIGHT SHOULDER ARMS, *shoulder_arms]
+          - [ORDER ARMS, *order_arms]
+          - [ABOUT FACE (REPEAT), *about_face]
+          - [PRESENT ARMS, *present_arms]
+          - [PARADE REST, *parade_rest]
+          - [COLUMN RIGHT (HALTED), *column]
+          - [LEFT FLANK / RETURN TO COLUMN, *flank]
+          - [COLUMN RIGHT, *column]
+          - [RIGHT FLANK / RETURN TO COLUMN, *flank]
+          - [LEFT OBLIQUE / HALF STEP, *oblique_half]
+          - [COLUMN RIGHT, *column]
+          - [MARCH TO THE REAR (REPEAT), *to_rear]
+          - [COLUMN RIGHT, *column]
+          - [CHANGE STEP, *change_step]
+          - [FALL OUT, *fall_out]
+      unit_leader: *unit_leader_squad
+      penalties: *basic_penalties
+
+  color_guard:
+    name: "Color Guard"
+    abbr: CG
+    judges: 2
+    sheets:
+      1: [movements, overall_impression, commander]
+      2: [movements, overall_impression]
+    sections:
+      movements:
+        title: "MOVEMENTS (fill ONE bubble per box)"
+        type: rating_table
+        columns: [CORRECT EXECUTION, PRECISION, ALIGNMENT / COVER, HAND-RIFLE-FOOT PLACEMENT]
+        rows:
+          # label, then the scale for each column (null = not scored)
+          - [ATTENTION,        [0-3, 0-2, 0-3, 0-2]]
+          - [CARRY COLORS,     [0-3, 0-2, 0-3, 0-2]]
+          - [COUNTER MARCH,    [0-4, 0-3, 0-3, null]]
+          - [FORWARD MARCH,    [0-4, 0-3, 0-3, null]]
+          - [LEFT TURN X 2,    [0-4, 0-3, 0-3, null]]
+          - [FORWARD MARCH,    [0-4, 0-3, 0-3, null]]
+          - [EYES LEFT,        [0-4, 0-3, 0-3, null]]
+          - [COUNTER MARCH,    [0-4, 0-3, 0-3, null]]
+          - [FORWARD MARCH,    [0-4, 0-3, 0-3, null]]
+          - [EYES RIGHT,       [0-4, 0-3, 0-3, null]]
+          - [RIGHT TURN X 2,   [0-4, 0-3, 0-3, null]]
+          - [FORWARD MARCH,    [0-4, 0-3, 0-3, null]]
+          - [COLOR HALT,       [0-3, 0-2, 0-3, 0-2]]
+          - [PRESENT COLORS,   [0-3, 0-2, 0-3, 0-2]]
+          - [ORDER COLORS,     [0-3, 0-2, 0-3, 0-2]]
+      overall_impression:
+        title: "OVERALL IMPRESSION"
+        type: ratings
+        items:
+          - [OVERALL IMPRESSION, 1-10]
+      commander:
+        title: "COLOR GUARD COMMANDER (Sheet #1 only)"
+        type: ratings
+        items:
+          - [COMMAND VOICE, 1-5]
+          - [COMMAND PRESENCE / BEARING, 1-5]
+          - [PROPER COMMANDS, 1-5]
+          - [EYES RIGHT, 1-5]
+
+  platoon_exhibition:
+    name: "Platoon Armed Exhibition"
+    abbr: PE
+    judges: 3
+    write_ins: [DRILL TIME]
+    sheets:
+      1: [categories, penalties]
+      2: [categories]
+      3: [categories]
+    sections:
+      categories: *exhibition_categories
+      penalties: *exhibition_penalties
+
+  individual_exhibition:
+    name: "Individual Armed Exhibition"
+    abbr: IE
+    judges: 2
+    individual: true          # entries are people, not teams
+    write_ins: [DRILL TIME]
+    sheets:
+      1: [categories, penalties]
+      2: [categories]
+    sections:
+      categories: *exhibition_categories
+      penalties: *exhibition_penalties

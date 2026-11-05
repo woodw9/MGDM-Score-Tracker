@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block body %}
+<div class="card" style="max-width:420px;margin:30px auto;text-align:center">
+  <img src="{{ url_for('static', filename='logo.png') }}" alt="Tulane NROTC" style="width:190px;max-width:60%;margin:4px auto 6px;display:block">
+  <h2 style="margin:6px 0 2px">{{ cfg.meet.name }}</h2>
+  <p class="muted" style="margin-top:0">Tabulation sign-in</p>
+  <form method="post" style="text-align:left">
+    <p><label>Your name (for the audit log)<br><input type="text" name="name" style="width:100%"></label></p>
+    <p><label>Passcode<br><input type="password" name="code" style="width:100%" autofocus></label></p>
+    <button class="big">Sign in</button>
+  </form>
+</div>
+{% endblock %}

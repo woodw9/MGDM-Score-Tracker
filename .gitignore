@@ -1,0 +1,10 @@
+.venv/
+__pycache__/
+data/
+output/
+config/.env
+config/google_service_account.json
+.DS_Store
+*.tmp.xlsx
+.claude/
+config/*service_account*.json

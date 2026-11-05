@@ -1,0 +1,53 @@
+# ---------------------------------------------------------------
+#  App settings (not scoring rules - those are in events.yaml)
+# ---------------------------------------------------------------
+
+reader:
+  # Claude model that reads the photos. The API key is read from the
+  # ANTHROPIC_API_KEY environment variable (or put it in config/.env).
+  # With no key, sheets still upload and the review form is filled in by hand.
+  model: claude-haiku-5-5
+  effort: medium          # low | medium | high  (higher = slower, more careful)
+  workers: 4              # photos read at the same time
+  max_image_px: 2400      # long side; photos are shrunk to this before sending
+  read_comments: false    # also transcribe the Comments box (costs a little more)
+  # Choices in the "Re-read photo" dropdown on the review screen (approx. cost per page)
+  reread_options:
+    - {model: claude-haiku-5-5,  effort: low,    label: "Haiku - low effort, fastest (~0.1 cents)"}
+    - {model: claude-haiku-5-5,  effort: high,   label: "Haiku - high effort (~0.3 cents)"}
+    - {model: claude-sonnet-5-5, effort: medium, label: "Sonnet - medium effort (~4 cents)"}
+    - {model: claude-sonnet-5-5, effort: high,   label: "Sonnet - high effort (~6 cents)"}
+    - {model: claude-opus-5-5,   effort: high,   label: "Opus - high effort, most careful (~12 cents)"}
+
+app:
+  host: 0.0.0.0           # 0.0.0.0 = phones on the same Wi-Fi can connect
+  port: 5050
+  # Tabulators must enter this passcode once per device. Blank = no passcode.
+  passcode: ""            # set MGDM_PASSCODE in config/.env (kept out of git)
+  # Master password for "Clear all scores" (Home page). Blank = clearing is switched off.
+  # Use something different from the passcode and only give it to the head tabulator.
+  admin_password: ""      # set MGDM_ADMIN_PASSWORD in config/.env (kept out of git)
+
+batch:
+  # Point the document scanner's "save to folder" at data/inbox. New scans are
+  # picked up automatically (PDFs are split into pages, blank backs skipped).
+  watch_inbox: true
+  watch_seconds: 5
+  skip_blank_pages: true
+  pdf_dpi: 220            # resolution PDF pages are turned into images at
+
+excel:
+  path: output/MGDM_2027_Master_Scores.xlsx
+
+google_sheets:
+  enabled: true
+  # 1) Create a Google Cloud service account, download its JSON key to
+  #    config/google_service_account.json
+  # 2) Create a blank Google Sheet, share it (Editor) with the service
+  #    account's email, and paste the sheet's ID (from its URL) below.
+  credentials_file: config/google_service_account.json
+  spreadsheet_id: "145aX_1HXHTtU0q5xwdsCUrJPz4BFSm9BS-5MlWl2tL8"   # internal: everything
+  # Optional second Google Sheet to share with the schools: gets ONLY the two
+  # Live Scoresheet tabs (overall + top 3). Share it with the service account
+  # as Editor, and with the schools as Viewer.
+  live_spreadsheet_id: ""

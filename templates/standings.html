@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block body %}
+<p><a class="btn secondary" href="{{ url_for('download_excel') }}">⬇ Download Excel</a></p>
+{% for name, rows in tables.items() if not name.startswith('Raw') and name != 'Audit Log' %}
+<div class="card"><h3 style="margin-top:0">{{ name }}</h3>
+<div class="tablewrap"><table>
+  <tr>{% for h in rows[0] %}<th>{{ h }}</th>{% endfor %}</tr>
+  {% for r in rows[1:] %}<tr>{% for c in r %}<td>{{ c }}</td>{% endfor %}</tr>{% endfor %}
+</table></div></div>
+{% endfor %}
+<p class="muted">Raw marks for every sheet and the audit log are in the Excel file.</p>
+{% endblock %}

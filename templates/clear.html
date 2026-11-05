@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block body %}
+<div class="card" style="max-width:640px;border-color:#f3b8b4">
+  <h2 style="margin-top:0;color:#b3261e">Clear all scores</h2>
+  <p>This removes <b>every</b> uploaded photo and score ({{ total }} page(s)) from the website, the Excel master and the Google Sheet - use it after practice runs, before the real meet.</p>
+  <p class="muted">A full backup (database + photos) is saved to <code>data/backups/</code> first, so it can be undone by copying it back. Config files, entries and printed sheets are not touched.</p>
+  {% if not enabled %}
+    <div class="warnbox">Clearing is switched off. Set <code>admin_password</code> in <code>config/settings.yaml</code>, then press "Reload config files" on the Home page.</div>
+  {% else %}
+  <form method="post" onsubmit="return confirm('Really clear ALL {{ total }} page(s) of scores? This cannot be undone from the website.')">
+    <p><label><b>Master password</b><br><input type="password" name="password" autocomplete="off" required style="width:100%"></label></p>
+    <p><label><b>Type <code>CLEAR ALL SCORES</code> to confirm</b><br><input type="text" name="confirm" autocomplete="off" required style="width:100%"></label></p>
+    <button class="danger">Clear all scores</button>
+    <a class="btn secondary" href="{{ url_for('home') }}">Cancel</a>
+  </form>
+  {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block body %}
+<div class="card"><h2 style="margin-top:0">All pages</h2>
+<div class="tablewrap"><table>
+<tr><th>ID</th><th>Status</th><th>Sheet</th><th>Entry</th><th>Confirmed by</th><th>Updated</th><th>File</th><th></th></tr>
+{% for p in pages %}{% set e = entries.get(p.entry_id or '') %}
+<tr><td>{{ p.id }}</td><td>{{ p.status }}{% if p.superseded %} (replaced){% endif %}</td>
+<td>{% if p.event %}{{ cfg.events[p.event].abbr }} J{{ p.judge }} p{{ p.page }}{% endif %}</td>
+<td>{{ e.display if e else (p.entry_id or '') }}</td><td>{{ p.confirmed_by or '' }}</td><td>{{ p.updated_at }}</td>
+<td>{{ p.original_name }}</td><td><a href="{{ url_for('page', pid=p.id) }}">open</a></td></tr>
+{% endfor %}</table></div></div>
+{% endblock %}

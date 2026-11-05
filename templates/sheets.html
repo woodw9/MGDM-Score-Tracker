@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block body %}
+<div class="card">
+  <h2 style="margin-top:0">Print scoresheets</h2>
+  <p>Builds a pre-labelled sheet for every entry in <code>config/entries.csv</code> and every judge, plus blank sets (for walk-ins; pick the school on the review screen).</p>
+  <form method="post">
+    <p><b>Group the PDFs by:</b><br>
+      <label><input type="radio" name="by" value="event" checked> Event - one PDF per event (all schools)</label><br>
+      <label><input type="radio" name="by" value="school"> School - one packet per school with all of its events, plus one PDF of blank spares</label></p>
+    <p><label>Blank sets per event <input type="number" name="blanks" value="2" min="0" max="20" style="width:70px"></label></p>
+    <button>Generate PDFs</button>
+  </form>
+  <p class="muted">Print at 100% / "Actual size" on Letter paper. Every sheet has its own QR code, so it doesn't matter which grouping you print - scores land in the same place.</p>
+  {% if ev_files %}<h3>By event</h3><ul>{% for f in ev_files %}<li><a href="{{ url_for('sheet_file', name=f) }}" target="_blank">{{ f }}</a></li>{% endfor %}</ul>{% endif %}
+  {% if sch_files %}<h3>By school</h3><ul>{% for f in sch_files %}<li><a href="{{ url_for('sheet_file', name=f) }}" target="_blank">{{ f.split('/')[-1] }}</a></li>{% endfor %}</ul>{% endif %}
+</div>
+{% endblock %}
